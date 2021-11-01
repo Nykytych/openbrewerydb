@@ -7,7 +7,7 @@ import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
-import org.openbrewerydb.constants.Enums;
+import org.openbrewerydb.models.AutocompleteModel;
 import org.openbrewerydb.models.BreweryModel;
 import org.openbrewerydb.utils.ConfigManager;
 
@@ -46,7 +46,7 @@ public class BreweryController {
                 .extract().response().as(BreweryModel.class);
     }
 
-    public BreweryModel[] getBreweries() {
+    public BreweryModel[] getAllBreweries() {
         return given(requestSpecification)
                 .get(GET_BREWERIES)
                 .then()
@@ -55,9 +55,9 @@ public class BreweryController {
                 .extract().response().as(BreweryModel[].class);
     }
 
-    public BreweryModel[] getBreweriesFiltred (Enums.FilterOption key, String param) {
+    public BreweryModel[] getBreweriesFiltred (String key, String param) {
         return given(requestSpecification )
-                .queryParam(key.toString().toLowerCase(), param)
+                .queryParam(key, param)
                 .get(GET_BREWERIES)
                 .then()
                 .statusCode(200)
@@ -66,16 +66,26 @@ public class BreweryController {
                 .extract().response().as(BreweryModel[].class);
     }
 
-    public BreweryModel[] getSearchBreweries (Enums.FilterOption key, String searchPhrase) {
+    public BreweryModel[] getSearchBreweries (String key, String searchPhrase) {
         return given(requestSpecification )
-                .queryParam(key.toString().toLowerCase(), searchPhrase)
+                .queryParam(key, searchPhrase)
                 .get(GET_SEARCH_BREWERIES)
                 .then()
                 .statusCode(200)
-                .assertThat().body("id", containsStringIgnoringCase(searchPhrase))
                 .and()
                 .log().all()
                 .extract().response().as(BreweryModel[].class);
+    }
+
+    public AutocompleteModel[] autocomplete (String key, String searchPhrase) {
+        return given(requestSpecification )
+                .queryParam(key.toString().toLowerCase(), searchPhrase)
+                .get(GET_AUTOCOMPLETE)
+                .then()
+                .statusCode(200)
+                .and()
+                .log().all()
+                .extract().response().as(AutocompleteModel[].class);
     }
 
 }
